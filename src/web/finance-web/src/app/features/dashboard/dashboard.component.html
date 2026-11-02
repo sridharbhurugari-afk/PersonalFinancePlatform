@@ -1,0 +1,90 @@
+<main class="dashboard">
+  <header class="dashboard__header">
+    <h1>Financial summary</h1>
+    @if (summary(); as s) {
+      <p class="muted">{{ s.periodStart | date: 'mediumDate' }} – {{ s.periodEnd | date: 'mediumDate' }}</p>
+    }
+  </header>
+
+  @if (loading()) {
+    <p role="status" aria-live="polite">Loading your summary…</p>
+  } @else if (error(); as message) {
+    <div class="error" role="alert">
+      <p>{{ message }}</p>
+      <button type="button" (click)="load()">Retry</button>
+    </div>
+  } @else if (summary(); as s) {
+    <section class="cards" aria-label="Totals">
+      <article class="card">
+        <h2>Income</h2>
+        <p class="amount amount--income">{{ s.totalIncome | currency: s.currency }}</p>
+      </article>
+      <article class="card">
+        <h2>Expenses</h2>
+        <p class="amount amount--expense">{{ s.totalExpenses | currency: s.currency }}</p>
+      </article>
+      <article class="card">
+        <h2>Net balance</h2>
+        <p class="amount" [class.amount--expense]="netBalance() < 0" [class.amount--income]="netBalance() >= 0">
+          {{ netBalance() | currency: s.currency }}
+        </p>
+      </article>
+    </section>
+
+    <section aria-labelledby="budgets-heading">
+      <h2 id="budgets-heading">
+        Budgets
+        @if (alertingBudgets() > 0) {
+          <span class="badge">{{ alertingBudgets() }} need attention</span>
+        }
+      </h2>
+      @for (b of s.budgets; track b.budgetId) {
+        <div class="budget">
+          <div class="budget__row">
+            <strong>{{ b.category }}</strong>
+            <span>
+              {{ b.spentAmount | currency: s.currency }} / {{ b.limitAmount | currency: s.currency }}
+              ({{ b.percentUsed | number: '1.0-0' }}%)
+            </span>
+          </div>
+          <div class="progress" role="progressbar" [attr.aria-valuenow]="barWidth(b.percentUsed)" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress__bar" [class]="progressClass(b.alertLevel)" [style.width.%]="barWidth(b.percentUsed)"></div>
+          </div>
+        </div>
+      } @empty {
+        <p class="muted">No active budgets yet.</p>
+      }
+    </section>
+
+    <section aria-labelledby="recent-heading">
+      <h2 id="recent-heading">Recent transactions</h2>
+      @if (s.recentTransactions.length > 0) {
+        <table class="transactions">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Description</th>
+              <th scope="col">Category</th>
+              <th scope="col">Method</th>
+              <th scope="col" class="num">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of s.recentTransactions; track t.id) {
+              <tr>
+                <td>{{ t.transactionDate | date: 'mediumDate' }}</td>
+                <!-- Interpolation is HTML-escaped by Angular; never bind descriptions via [innerHTML]. -->
+                <td>{{ t.description || '—' }}</td>
+                <td>{{ t.category }}</td>
+                <td>{{ t.paymentMethod }}</td>
+                <td class="num">{{ t.amount | currency: s.currency }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="muted">No transactions recorded for this period.</p>
+      }
+    </section>
+  }
+</main>

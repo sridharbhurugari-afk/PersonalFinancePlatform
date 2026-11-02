@@ -1,0 +1,6 @@
+{
+  "/api/auth": { "target": "http://localhost:5001", "secure": false },
+  "/api/expenses": { "target": "http://localhost:5002", "secure": false },
+  "/api/budgets": { "target": "http://localhost:5003", "secure": false },
+  "/api/summary": { "target": "http://localhost:5004", "secure": false }
+}

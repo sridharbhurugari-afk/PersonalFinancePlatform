@@ -1,0 +1,27 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+coverage/
+*.log
+logs/
+
+## Secrets / local config
+.env
+appsettings.*.local.json
+secrets.json
+*.pfx
+
+## Node / Angular
+node_modules/
+dist/
+.angular/
+.sass-cache/
+*.tsbuildinfo
+
+## IDE
+.idea/
+*.swp
